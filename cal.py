@@ -1,8 +1,9 @@
 import numpy as np
 
-SLIDES_NUM = 10
+SLIDES_NUM = 10  # 滑动次数，可改动
+LAST_SEASON = 0
 
-f = open(r"58424 1974.txt")
+f = open(r"58424 1974.txt")  # 输入的数据必须为正常的数据（还在判定春天时就符合夏天条件的数据可能会引起异常）
 line = f.readline()
 # data_list = []
 num = list(map(int, line.split()))
@@ -17,6 +18,7 @@ data_array = np.array(num)
 
 # print(data_array.size)
 # print(data_array)
+
 
 def calendar(leap, n):
     if leap is True:
@@ -96,12 +98,12 @@ class Window:
 
 tmp = 0
 # 计算春季
-while data_array[tmp] < 100:
-    tmp += 1
-
-window1 = Window(tmp + 2)
 
 try:
+    while data_array[tmp] < 100:
+        tmp += 1
+
+    window1 = Window(tmp + 2)
     while True:
         if window1.window >= 500:
             note = True
@@ -114,6 +116,8 @@ try:
                     if data_array[window1.right - 4 + i] >= 100:
                         # print(window1.right - 3 + i)
                         calendar(True, window1.right - 1 + i)
+                        LAST_SEASON = 1
+                        tmp = window1.right
                         break
                 break
             window1.slide()
@@ -121,77 +125,104 @@ try:
             window1.slide()
 except IndexError:
     print("没有春季")
-
+    tmp = 0
 
 # 计算夏季
-while data_array[tmp] < 220:
-    tmp += 1
 
-window2 = Window(tmp + 2)
 
-while True:
-    if window2.window >= 1100:
-        note = True
-        for i in range(1, SLIDES_NUM):
-            if window2.next_n_window(i) < 1100:
-                note = False
-                break
-        if note is True:
-            for i in range(0, 5):
-                if data_array[window2.right - 4 + i] >= 220:
-                    # print(window2.right - 3 + i)
-                    calendar(True, window2.right - 1 + i)
+try:
+    while data_array[tmp] < 220:
+        tmp += 1
+
+    window2 = Window(tmp + 2)
+    while True:
+        if window2.window >= 1100:
+            note = True
+            for i in range(1, SLIDES_NUM):
+                if window2.next_n_window(i) < 1100:
+                    note = False
                     break
-            break
-        window2.slide()
+            if note is True:
+                for i in range(0, 5):
+                    if data_array[window2.right - 4 + i] >= 220:
+                        # print(window2.right - 3 + i)
+                        calendar(True, window2.right - 1 + i)
+                        LAST_SEASON = 2
+                        tmp = window2.right
+                        break
+                break
+            window2.slide()
+        else:
+            window2.slide()
+except IndexError:
+    print("没有夏季")
+    if LAST_SEASON == 0:
+        tmp = 0
     else:
-        window2.slide()
+        tmp = window1.right
 
 # 计算秋季
-tmp = window2.right
-while data_array[tmp] >= 220:
-    tmp += 1
 
-window3 = Window(tmp + 2)
 
-while True:
-    if window3.window < 1100:
-        note = True
-        for i in range(1, SLIDES_NUM):
-            if window3.next_n_window(i) >= 1100:
-                note = False
-                break
-        if note is True:
-            for i in range(0, 5):
-                if data_array[window3.right - 4 + i] < 220:
-                    # print(window3.right - 3 + i)
-                    calendar(True, window3.right - 1 + i)
+try:
+    while data_array[tmp] >= 220:
+        tmp += 1
+
+    window3 = Window(tmp + 2)
+    while True:
+        if window3.window < 1100:
+            note = True
+            for i in range(1, SLIDES_NUM):
+                if window3.next_n_window(i) >= 1100:
+                    note = False
                     break
-            break
-        window3.slide()
+            if note is True:
+                for i in range(0, 5):
+                    if data_array[window3.right - 4 + i] < 220:
+                        # print(window3.right - 3 + i)
+                        calendar(True, window3.right - 1 + i)
+                        LAST_SEASON = 3
+                        tmp = window3.right
+                        break
+                break
+            window3.slide()
+        else:
+            window3.slide()
+except IndexError:
+    print("没有秋季")
+    if LAST_SEASON == 0:
+        tmp = 0
+    elif LAST_SEASON == 1:
+        tmp = window1.right
     else:
-        window3.slide()
+        tmp = window2.right
 
 # 计算冬季
-while data_array[tmp] >= 100:
-    tmp += 1
 
-window4 = Window(tmp + 2)
 
-while True:
-    if window4.window < 500:
-        note = True
-        for i in range(1, SLIDES_NUM):
-            if window4.next_n_window(i) >= 500:
-                note = False
-                break
-        if note is True:
-            for i in range(0, 5):
-                if data_array[window4.right - 4 + i] < 100:
-                    # print(window4.right - 3 + i)
-                    calendar(True, window4.right - 1 + i)
+try:
+    while data_array[tmp] >= 100:
+        tmp += 1
+
+    window4 = Window(tmp + 2)
+    while True:
+        if window4.window < 500:
+            note = True
+            for i in range(1, SLIDES_NUM):
+                if window4.next_n_window(i) >= 500:
+                    note = False
                     break
-            break
-        window4.slide()
-    else:
-        window4.slide()
+            if note is True:
+                for i in range(0, 5):
+                    if data_array[window4.right - 4 + i] < 100:
+                        # print(window4.right - 3 + i)
+                        calendar(True, window4.right - 1 + i)
+                        LAST_SEASON = 4
+                        # tmp = window4.right
+                        break
+                break
+            window4.slide()
+        else:
+            window4.slide()
+except IndexError:
+    print("没有冬季")
